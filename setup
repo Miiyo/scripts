@@ -1,0 +1,21 @@
+#!/bin/bash
+
+GIT_USER=
+GIT_EMAIL=
+
+# Setup Git
+
+git config --global user.email "${GIT_EMAIL}"
+
+git config --global user.name "${GIT_USER}"
+
+# Setup New GLIB
+
+sudo add-apt-repository 'deb http://mirrors.kernel.org/ubuntu kinetic main universe'
+
+sudo apt-get update
+
+sudo apt-get install gcc-11 -y
+
+sudo apt-get upgrade libstdc++6 -y
+
