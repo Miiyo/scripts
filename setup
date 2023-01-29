@@ -9,6 +9,10 @@ git config --global user.email "${GIT_EMAIL}"
 
 git config --global user.name "${GIT_USER}"
 
+# Install RSYNC
+
+sudo apt-get install rsync -y 
+
 # Setup New GLIB
 
 sudo add-apt-repository 'deb http://mirrors.kernel.org/ubuntu kinetic main universe'
