@@ -1,11 +1,12 @@
 #!/bin/bash
 
 KERNEL_DEFCONFIG=
+KERNEL_DIR=
 CLANG_DIR=
 export KBUILD_BUILD_USER=ekkusa
 export KBUILD_BUILD_HOST=miyo
 
-
+cd ${KERNEL_DIR}
 make O=out ARCH=arm64 ${KERNEL_DEFCONFIG}
 PATH="${CLANG_DIR}/bin:${PATH}" \
 make -j$(nproc --all) O=out \
