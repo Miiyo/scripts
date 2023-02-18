@@ -89,7 +89,7 @@ file() {
 }
 
 kernelbuild(){
-msg "MiyoK-Fate運命
+msg "-----[MiyoK-Fate運命]-----
 起きて～！Kernel Build has been triggered!
 Date: $DATE
 Device: $DEVICE
