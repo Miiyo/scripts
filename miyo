@@ -32,6 +32,15 @@ type=global
 fi
 }
 
+ksucheck(){
+if grep -R "CONFIG_HAVE_KPROBES" arch/arm64/configs/
+then
+KSU=true
+else
+KSU=false
+fi
+}
+
 githubconfig(){
 # github info
 GIT_USER=
@@ -85,6 +94,7 @@ msg "-MiyoK-Fate運命
 -Date: $DATE
 -Device: $DEVICE
 -Type : $type
+-KSU : $KSU
 -Version: $VERSION
 -Branch: $BRANCH
 -Date: $DATE
@@ -129,6 +139,7 @@ if [ "$1" == "compile" ]; then
     anykernel3
     cleanup
     cd ${KERNEL_DIR}
+    ksucheck
     checktype
     Info
     kernelbuild
