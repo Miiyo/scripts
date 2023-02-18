@@ -24,21 +24,23 @@ BRANCH=$(git rev-parse --abbrev-ref HEAD)
 COMPILER=$($CLANG_DIR/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 }
 
-setup(){
-# Github Info
+githubconfig(){
+# github info
 GIT_USER=
 GIT_EMAIL=
-
-# Setup Git Configuration
+# Set git config
 git config --global user.email "${GIT_EMAIL}"
 git config --global user.name "${GIT_USER}"
+}
 
+setup(){
 # Update gcc
 sudo add-apt-repository 'deb http://mirrors.kernel.org/ubuntu kinetic main universe'
 sudo apt-get update
 sudo apt-get install gcc-11 -y
 sudo apt-get upgrade libstdc++6 -y
 }
+
 
 compile(){
 BUILD_START=$(date +"%s")
@@ -129,4 +131,10 @@ fi
 if [ "$1" == "setup" ]; then
     echo "Setting up workspace"
     setup
+    githubconfig
+fi
+
+if [ "$1" == "githubset" ]; then
+    echo "Setting up github"
+    githubconfig
 fi
