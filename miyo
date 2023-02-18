@@ -1,0 +1,132 @@
+#!/bin/bash
+
+KERNEL_DEFCONFIG=miyo_akari_kddi_defconfig
+KERNEL_DIR=/workspace/android_kernel_sony_sdm845
+CLANG_DIR=/workspace/neutron
+WORK_DIR=/workspace
+export KBUILD_BUILD_USER=ekkusa
+export KBUILD_BUILD_HOST=miyo
+BotToken=
+ID=
+
+anykernel3(){
+rm -rf $WORK_DIR/Anykernel
+git clone --depth=1 https://github.com/Miiyo/AnyKernel3 $WORK_DIR/Anykernel
+}
+
+Info(){
+DEVICE="Sony Xperia XZ2 (akari)"
+DATE=$(TZ=Asia/Singapore date +%d'-'%m'-'%y'_'%I':'%M)
+VERSION=$(make kernelversion)
+DISTRO=$(source /etc/os-release && echo $NAME)
+CORES=$(nproc --all)
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+COMPILER=$($CLANG_DIR/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
+}
+
+setup(){
+# Github Info
+GIT_USER=
+GIT_EMAIL=
+
+# Setup Git Configuration
+git config --global user.email "${GIT_EMAIL}"
+git config --global user.name "${GIT_USER}"
+
+# Update gcc
+sudo add-apt-repository 'deb http://mirrors.kernel.org/ubuntu kinetic main universe'
+sudo apt-get update
+sudo apt-get install gcc-11 -y
+sudo apt-get upgrade libstdc++6 -y
+}
+
+compile(){
+BUILD_START=$(date +"%s")
+make O=out ARCH=arm64 ${KERNEL_DEFCONFIG}
+PATH="${CLANG_DIR}/bin:${PATH}" \
+make -j$(nproc --all) O=out \
+                      ARCH=arm64 \
+                      CC=clang \
+                      LD=ld.lld \
+                      AR=llvm-ar \
+                      NM=llvm-nm \
+                      OBJCOPY=llvm-objcopy \
+                      OBJDUMP=llvm-objdump \
+                      STRIP=llvm-strip \
+                      CROSS_COMPILE=aarch64-linux-gnu- \
+                      CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+}
+
+# Functions
+msg() {
+	curl -X POST "https://api.telegram.org/bot$BotToken/sendMessage" -d chat_id="$ID" \
+	-d text="$1"
+}
+
+file() {
+	curl -F document=@"$1" "https://api.telegram.org/bot$BotToken/sendDocument" \
+	-F chat_id="$ID"  \
+	-F caption="$2"
+}
+
+kernelbuild(){
+msg "-MiyoK-Fate運命
+-起きて～！Kernel Build has been triggered!
+-Date: $DATE
+-Device: $DEVICE
+-Type : KDDI
+-Version: $VERSION
+-Branch: $BRANCH
+-Date: $DATE
+-Host: $KBUILD_BUILD_HOST
+-Cores: $CORES
+-Clang: $COMPILER
+"
+}
+
+flashable(){
+if [ -f out/arch/arm64/boot/Image.gz-dtb ]
+then
+cp out/arch/arm64/boot/Image.gz-dtb $WORK_DIR/Anykernel
+cd $WORK_DIR/Anykernel
+zip -r9 MiyoFate-$DATE.zip * -x .git README.md */placeholder
+cp $WORK_DIR/Anykernel/MiyoFate-$DATE.zip $WORK_DIR/
+BUILD_END=$(date +"%s")
+DIFF=$((BUILD_END - BUILD_START))
+else
+echo 'error'
+fi
+}
+
+upload(){
+file "/workspace/MiyoFate-$DATE.zip" "起きろ！ Kernel Compiled! 
+Build took : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
+}
+
+cleanup(){
+rm -rf $WORK_DIR/MiyoFate*
+}
+
+if [ "$1" == "-msg" ]; then
+    msg "$2"
+fi
+
+if [ "$1" == "-file" ]; then
+    file "$2"
+fi
+
+if [ "$1" == "compile" ]; then
+    anykernel3
+    cleanup
+    cd ${KERNEL_DIR}
+    Info
+    kernelbuild
+    compile
+    flashable
+    upload
+fi
+
+if [ "$1" == "setup" ]; then
+    echo "Setting up workspace"
+    setup
+fi
