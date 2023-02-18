@@ -18,7 +18,6 @@ Info(){
 DEVICE="Sony Xperia XZ2 (akari)"
 DATE=$(TZ=Asia/Singapore date +%d'-'%m'-'%y'_'%I':'%M)
 VERSION=$(make kernelversion)
-DISTRO=$(source /etc/os-release && echo $NAME)
 CORES=$(nproc --all)
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 COMPILER=$($CLANG_DIR/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
