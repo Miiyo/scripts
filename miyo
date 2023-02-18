@@ -97,7 +97,6 @@ msg "-MiyoK-Fate運命
 -KSU : $KSU
 -Version: $VERSION
 -Branch: $BRANCH
--Date: $DATE
 -Host: $KBUILD_BUILD_HOST
 -Cores: $CORES
 -Clang: $COMPILER
