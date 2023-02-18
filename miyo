@@ -23,6 +23,15 @@ BRANCH=$(git rev-parse --abbrev-ref HEAD)
 COMPILER=$($CLANG_DIR/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 }
 
+checktype(){
+if [[ $KERNEL_DEFCONFIG = *"kddi"* ]];
+then
+type=kddi
+else
+type=global
+fi
+}
+
 githubconfig(){
 # github info
 GIT_USER=
@@ -75,7 +84,7 @@ msg "-MiyoK-Fate運命
 -起きて～！Kernel Build has been triggered!
 -Date: $DATE
 -Device: $DEVICE
--Type : KDDI
+-Type : $type
 -Version: $VERSION
 -Branch: $BRANCH
 -Date: $DATE
@@ -120,6 +129,7 @@ if [ "$1" == "compile" ]; then
     anykernel3
     cleanup
     cd ${KERNEL_DIR}
+    checktype
     Info
     kernelbuild
     compile
