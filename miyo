@@ -89,16 +89,16 @@ file() {
 }
 
 kernelbuild(){
-msg "-MiyoK-Fate運命
--起きて～！Kernel Build has been triggered!
--Date: $DATE
--Device: $DEVICE
--Type : $type
--KSU : $KSU
--Version: $VERSION
--Host: $KBUILD_BUILD_HOST
--Cores: $CORES
--Clang: $COMPILER
+msg "MiyoK-Fate運命
+起きて～！Kernel Build has been triggered!
+Date: $DATE
+Device: $DEVICE
+Type : $type
+KSU : $KSU
+Version: $VERSION
+Host: $KBUILD_BUILD_HOST
+Cores: $CORES
+Clang: $COMPILER
 "
 }
 
