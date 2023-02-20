@@ -1,0 +1,117 @@
+#!/bin/bash
+
+echo ""
+echo "[Miyo-ArchChroot]"
+echo "@ekkusa"
+echo ""
+
+unset LD_PRELOAD
+
+checker(){
+if [ -d "$folder" ];
+then
+        first=1
+        echo -e "[$folder already exist]" && sleep 0.5
+exit
+fi
+}
+
+whicharch(){
+uname -m
+}
+# Downloads the tarball for archlinux arm64
+sync_tarball(){
+	cd $folder
+	wget http://sg.mirror.archlinuxarm.org/os/ArchLinuxARM-aarch64-latest.tar.gz
+}
+
+extract_tarball(){
+echo "Extracting the rootfs, please wait..."
+sudo tar -xf $folder/ArchLinuxARM-aarch64-latest.tar.gz
+rm $folder/ArchLinuxARM-aarch64-latest.tar.gz
+}
+
+setprofile()
+{
+echo "unset LD_PRELOAD" >> $folder/etc/profile
+}
+
+nameserver(){
+rm $folder/root/etc/resolv.conf
+echo "nameserver 1.1.1.1" > $folder/root/etc/resolv.conf
+}
+
+sethostname(){
+echo "$hostname" > $folder/etc/hostname
+}
+
+sethosts(){
+echo "127.0.0.1		localhost" >> $folder/etc/hosts
+echo "::1				localhost" >> $folder/etc/hosts
+echo "127.0.1.1		$hostname.localdomain		$hostname" >> $folder/etc/hosts
+}
+
+servicectl(){
+wget -O servicectl.tar.gz https://github.com/selirra/servicectl/archive/1.0.tar.gz
+tar -xf servicectl.tar.gz -C /usr/local/lib/
+ln -s /usr/local/lib/servicectl-1.0/servicectl /usr/local/bin/servicectl
+ln -s /usr/local/lib/servicectl-1.0/serviced /usr/local/bin/serviced
+rm servicectl.tar.gz
+}
+
+mount_internal(){
+	mkdir $folder/root/sdcard
+	mount -o bind /sdcard $folder/root/sdcard
+}
+
+mount(){
+echo " [ Mounting /dev ]"
+mount --bind /dev /root/dev
+echo " [ Mounting /proc ]"
+mount --bind /proc /root/proc
+echo " [ Mounting /sys ]"
+mount --bind /sysfs /root/sys
+echo " [ Mounting /tmp ]"
+mount --bind /tmpfs /root/tmp
+echo " [ Mounting /dev/pts ]"
+mount --bind /dev/pts /root/dev/pts
+}
+
+echo "[Container location]"
+read folder
+# checker //Disable this for now for testing
+echo "[Creating Container Directory]"
+mkdir $folder
+
+echo
+
+echo "[Syncing archlinux Tarball]"
+whicharch
+sync_tarball
+extract_tarball
+
+echo 
+
+echo "[Setting up Profile]"
+setprofile
+
+echo
+
+echo "[Setting Hostname]"
+echo "Set hostname"
+read hostname
+sethostname 
+
+echo
+
+echo "[Setting Hosts]"
+sethosts
+
+echo "[Mounting File System]"
+mount
+mount_internal
+
+echo "[Setting up servicectl]"
+servicectl
+
+chroot $folder /bin/bash -l
