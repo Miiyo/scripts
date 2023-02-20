@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 echo ""
 echo "[Miyo-ArchChroot]"
@@ -53,28 +53,28 @@ echo "127.0.1.1		$hostname.localdomain		$hostname" >> $folder/etc/hosts
 
 servicectl(){
 wget -O servicectl.tar.gz https://github.com/selirra/servicectl/archive/1.0.tar.gz
-tar -xf servicectl.tar.gz -C /usr/local/lib/
-ln -s /usr/local/lib/servicectl-1.0/servicectl /usr/local/bin/servicectl
-ln -s /usr/local/lib/servicectl-1.0/serviced /usr/local/bin/serviced
-rm servicectl.tar.gz
+tar -xf servicectl.tar.gz -C $folder/usr/local/lib/
+ln -s $folder/usr/local/lib/servicectl-1.0/servicectl $folder/usr/local/bin/servicectl
+ln -s $folder/usr/local/lib/servicectl-1.0/serviced $folder/usr/local/bin/serviced
+rm $folder/servicectl.tar.gz
 }
 
 mount_internal(){
-	mkdir $folder/root/sdcard
-	mount -o bind /sdcard $folder/root/sdcard
+	mkdir $folder/sdcard
+	mount -o bind /sdcard $folder/sdcard
 }
 
 mount(){
 echo " [ Mounting /dev ]"
-mount --bind /dev /root/dev
+mount --bind /dev $folder/dev
 echo " [ Mounting /proc ]"
-mount --bind /proc /root/proc
+mount --bind /proc $folder/proc
 echo " [ Mounting /sys ]"
-mount --bind /sysfs /root/sys
+mount --bind /sysfs $folder/sys
 echo " [ Mounting /tmp ]"
-mount --bind /tmpfs /root/tmp
+mount --bind /tmpfs $folder/tmp
 echo " [ Mounting /dev/pts ]"
-mount --bind /dev/pts /root/dev/pts
+mount --bind /dev/pts $folder/dev/pts
 }
 
 echo "[Container location]"
@@ -114,4 +114,4 @@ mount_internal
 echo "[Setting up servicectl]"
 servicectl
 
-chroot $folder /bin/bash -l
+chroot $folder /bin/su - root
