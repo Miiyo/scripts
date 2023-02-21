@@ -21,6 +21,7 @@ VERSION=$(make kernelversion)
 CORES=$(nproc --all)
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 COMPILER=$($CLANG_DIR/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
+TAG=$(echo $RANDOM | md5sum | head -c 6; echo;)
 }
 
 checktype(){
@@ -89,7 +90,7 @@ file() {
 }
 
 kernelbuild(){
-msg "-----[MiyoK-Fate運命]-----
+msg "-----[MiyoK-Fate運命]----- [$TAG]
 起きて～！Kernel Build has been triggered!
 Date: $DATE
 Device: $DEVICE
@@ -117,7 +118,7 @@ fi
 }
 
 upload(){
-file "/workspace/MiyoFate-$DATE.zip" "起きろ！ Kernel Compiled! 
+file "/workspace/MiyoFate-$DATE.zip" "起きろ！ Kernel Compiled! [$TAG]
 Build took : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
 }
 
