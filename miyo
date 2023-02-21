@@ -15,7 +15,6 @@ git clone --depth=1 https://github.com/Miiyo/AnyKernel3 $WORK_DIR/Anykernel
 }
 
 Info(){
-DEVICE="Sony Xperia XZ2 (akari)"
 DATE=$(TZ=Asia/Singapore date +%d'-'%m'-'%y'_'%I':'%M)
 VERSION=$(make kernelversion)
 CORES=$(nproc --all)
@@ -40,6 +39,23 @@ KSU=true
 else
 KSU=false
 fi
+}
+
+checkdevice(){
+    if [[ $KERNEL_DEFCONFIG = *"akari"* ]];
+    then
+    DEVICE="Sony Xperia XZ2 (akari)"
+    else
+        if [[ $KERNEL_DEFCONFIG = *"akatsuki"* ]];
+        then
+        DEVICE="Sony Xperia XZ3 (akatsuki)"
+        else
+            if [[ $KERNEL_DEFCONFIG = *"aurora"* ]];
+            then
+            DEVICE="Sony Xperia XZ2P (aurora)"
+            fi
+        fi
+    fi
 }
 
 githubconfig(){
@@ -140,6 +156,7 @@ if [ "$1" == "compile" ]; then
     cd ${KERNEL_DIR}
     ksucheck
     checktype
+    checkdevice
     Info
     kernelbuild
     compile
