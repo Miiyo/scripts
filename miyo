@@ -35,7 +35,8 @@ fi
 ksucheck(){
 if grep -R "CONFIG_HAVE_KPROBES" arch/arm64/configs/
 then
-KSU=true
+KSU_GIT_VERSION=$(shell cd $KERNEL_DIR/KernelSU; /usr/bin/env PATH=$$PATH:/usr/bin:/usr/local/bin git rev-list --count HEAD)
+KSU=$((10000 + KSU_GIT_VERSION + 200))
 else
 KSU=n/a
 fi
