@@ -1,8 +1,8 @@
 #!/bin/bash
 
-KERNEL_DEFCONFIG=miyo_akari_kddi_defconfig
+KERNEL_DEFCONFIG=tama_akari_kddi_defconfig
 KERNEL_DIR=/workspace/android_kernel_sony_sdm845
-CLANG_DIR=/workspace/neutron
+CLANG_DIR=/workspace/weeb
 WORK_DIR=/workspace
 export KBUILD_BUILD_USER=ekkusa
 export KBUILD_BUILD_HOST=miyo
