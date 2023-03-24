@@ -37,7 +37,7 @@ if grep -R "CONFIG_HAVE_KPROBES" arch/arm64/configs/
 then
 KSU=true
 else
-KSU=false
+KSU=n/a
 fi
 }
 
@@ -106,7 +106,7 @@ file() {
 }
 
 kernelbuild(){
-msg "-----[MiyoK-Fate運命]----- [$TAG]
+msg "-----[Miyo-Toku🐼]----- [$TAG]
 起きて～！Kernel Build has been triggered!
 Date: $DATE
 Device: $DEVICE
@@ -124,8 +124,8 @@ if [ -f out/arch/arm64/boot/Image.gz-dtb ]
 then
 cp out/arch/arm64/boot/Image.gz-dtb $WORK_DIR/Anykernel
 cd $WORK_DIR/Anykernel
-zip -r9 MiyoFate-$DATE.zip * -x .git README.md */placeholder
-cp $WORK_DIR/Anykernel/MiyoFate-$DATE.zip $WORK_DIR/
+zip -r9 MiyoToku-$DATE.zip * -x .git README.md */placeholder
+cp $WORK_DIR/Anykernel/MiyoToku-$DATE.zip $WORK_DIR/
 BUILD_END=$(date +"%s")
 DIFF=$((BUILD_END - BUILD_START))
 else
@@ -134,12 +134,12 @@ fi
 }
 
 upload(){
-file "/workspace/MiyoFate-$DATE.zip" "起きろ！ Kernel Compiled! [$TAG]
+file "/workspace/MiyoToku-$DATE.zip" "起きろ！ Kernel Compiled! [$TAG]
 Build took : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
 }
 
 cleanup(){
-rm -rf $WORK_DIR/MiyoFate*
+rm -rf $WORK_DIR/MiyoToku*
 }
 
 if [ "$1" == "-msg" ]; then
