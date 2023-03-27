@@ -137,6 +137,7 @@ rm -rf $WORK_DIR/MiyoToku*
 
 if [ "$1" == "clang" ]; then
     WeebClang
+    clonekernel
 fi
 
 if [ "$1" == "compile" ]; then
