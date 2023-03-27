@@ -1,0 +1,154 @@
+#!/bin/bash
+
+<===================[ Build Configurations ]===================>
+KERNEL_DEFCONFIG=tama_akari_kddi_defconfig
+KERNEL_DIR=$PWD/android_kernel_sony_sdm845
+CLANG_DIR=$PWD/weeb
+WORK_DIR=$PWD
+export KBUILD_BUILD_USER=ekkusa
+export KBUILD_BUILD_HOST=miyo
+BotToken=$BOT_API_KEY
+ID=$CHANNEL_ID
+
+anykernel3(){
+rm -rf $WORK_DIR/Anykernel
+git clone --depth=1 https://github.com/Miiyo/AnyKernel3 $WORK_DIR/Anykernel
+}
+
+Info(){
+DATE=$(TZ=Asia/Singapore date +%d'-'%m'-'%y'_'%I':'%M)
+VERSION=$(make kernelversion)
+CORES=$(nproc --all)
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+COMPILER=$($CLANG_DIR/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
+TAG=$(echo $RANDOM | md5sum | head -c 6; echo;)
+}
+
+checktype(){
+if [[ $KERNEL_DEFCONFIG = *"kddi"* ]];
+then
+type=kddi
+else
+type=global
+fi
+}
+
+ksucheck(){
+if grep -R "CONFIG_HAVE_KPROBES" arch/arm64/configs/
+then
+KSU_GIT_VERSION=$(shell cd $KERNEL_DIR/KernelSU; /usr/bin/env PATH=$$PATH:/usr/bin:/usr/local/bin git rev-list --count HEAD)
+KSU=$((10000 + KSU_GIT_VERSION + 200))
+else
+KSU=n/a
+fi
+}
+
+checkdevice(){
+    if [[ $KERNEL_DEFCONFIG = *"akari"* ]];
+    then
+    DEVICE="Sony Xperia XZ2 (akari)"
+    else
+        if [[ $KERNEL_DEFCONFIG = *"akatsuki"* ]];
+        then
+        DEVICE="Sony Xperia XZ3 (akatsuki)"
+        else
+            if [[ $KERNEL_DEFCONFIG = *"aurora"* ]];
+            then
+            DEVICE="Sony Xperia XZ2P (aurora)"
+            fi
+        fi
+    fi
+}
+
+WeebClang(){
+wget $(curl -s https://raw.githubusercontent.com/XSans0/WeebX-Clang/main/main/link.txt) -O "weebx-clang.tar.gz"
+mkdir weeb && tar -xf weebx-clang.tar.gz -C weeb && rm -rf weebx-clang.tar.gz
+}
+
+clonekernel(){
+git clone https://github.com/Miiyo/android_kernel_sony_sdm845 -b MiyoToku-KSU
+}
+
+compile(){
+BUILD_START=$(date +"%s")
+make O=out ARCH=arm64 ${KERNEL_DEFCONFIG}
+PATH="${CLANG_DIR}/bin:${PATH}" \
+make -j$(nproc --all) O=out \
+                      ARCH=arm64 \
+                      CC=clang \
+                      LD=ld.lld \
+                      AR=llvm-ar \
+                      NM=llvm-nm \
+                      OBJCOPY=llvm-objcopy \
+                      OBJDUMP=llvm-objdump \
+                      STRIP=llvm-strip \
+                      CROSS_COMPILE=aarch64-linux-gnu- \
+                      CROSS_COMPILE_ARM32=arm-linux-gnueabi-
+}
+
+# Functions
+msg() {
+	curl -X POST "https://api.telegram.org/bot$BotToken/sendMessage" -d chat_id="$ID" \
+	-d text="$1"
+}
+
+file() {
+	curl -F document=@"$1" "https://api.telegram.org/bot$BotToken/sendDocument" \
+	-F chat_id="$ID"  \
+	-F caption="$2"
+}
+
+kernelbuild(){
+msg "-----[Miyo-Toku🐼]----- [$TAG]
+起きて～！Kernel Build has been triggered!
+Date: $DATE
+Device: $DEVICE
+Type : $type
+KSU : $KSU
+Version: $VERSION
+Host: $KBUILD_BUILD_HOST
+Cores: $CORES
+Clang: $COMPILER
+"
+}
+
+flashable(){
+if [ -f out/arch/arm64/boot/Image.gz-dtb ]
+then
+cp out/arch/arm64/boot/Image.gz-dtb $WORK_DIR/Anykernel
+cd $WORK_DIR/Anykernel
+zip -r9 MiyoToku-$DATE.zip * -x .git README.md */placeholder
+cp $WORK_DIR/Anykernel/MiyoToku-$DATE.zip $WORK_DIR/
+BUILD_END=$(date +"%s")
+DIFF=$((BUILD_END - BUILD_START))
+else
+echo 'error'
+fi
+}
+
+upload(){
+file "/workspace/MiyoToku-$DATE.zip" "起きろ！ Kernel Compiled! [$TAG]
+Build took : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
+}
+
+cleanup(){
+rm -rf $WORK_DIR/MiyoToku*
+}
+
+if [ "$1" == "clang" ]; then
+    WeebClang
+fi
+
+if [ "$1" == "compile" ]; then
+    anykernel3
+    cleanup
+    cd ${KERNEL_DIR}
+    ksucheck
+    checktype
+    checkdevice
+    Info
+    kernelbuild
+    compile
+    flashable
+    upload
+fi
