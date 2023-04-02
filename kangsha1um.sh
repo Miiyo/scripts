@@ -40,6 +40,7 @@ fi
 echo "# Base directory: $base_dir" >> "$output_file"
 echo "# Input file: $file_path" >> "$output_file"
 echo "# Timestamp: $(date)" >> "$output_file"
+echo "" >> "$output_file"
 
 # Loop through each line in the file
 while IFS= read -r line; do
