@@ -48,7 +48,7 @@ while IFS= read -r line; do
   file="$base_dir/$line"
   # Check that the file exists
   if [ ! -f "$file" ]; then
-    echo "[File not found $file]" >> "$output_file"
+    echo "[File not found ${line//$base_dir\/}]" >> "$output_file"
     continue
   fi
   # Generate the SHA1 hash for the current file
