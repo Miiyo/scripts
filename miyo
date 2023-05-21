@@ -35,7 +35,7 @@ fi
 ksucheck(){
 if grep -R "CONFIG_HAVE_KPROBES" arch/arm64/configs/
 then
-KSU_GIT_VERSION=$(shell cd $KERNEL_DIR/KernelSU; /usr/bin/env PATH=$$PATH:/usr/bin:/usr/local/bin git rev-list --count HEAD)
+KSU_GIT_VERSION=$(cd $KERNEL_DIR/KernelSU; /usr/bin/env PATH=$$PATH:/usr/bin:/usr/local/bin git rev-list --count HEAD)
 KSU=$((10000 + KSU_GIT_VERSION + 200))
 else
 KSU=n/a
@@ -58,24 +58,6 @@ checkdevice(){
         fi
     fi
 }
-
-githubconfig(){
-# github info
-GIT_USER=
-GIT_EMAIL=
-# Set git config
-git config --global user.email "${GIT_EMAIL}"
-git config --global user.name "${GIT_USER}"
-}
-
-setup(){
-# Update gcc
-sudo add-apt-repository 'deb http://mirrors.kernel.org/ubuntu kinetic main universe'
-sudo apt-get update
-sudo apt-get install gcc-11 -y
-sudo apt-get upgrade libstdc++6 -y
-}
-
 
 compile(){
 BUILD_START=$(date +"%s")
@@ -163,15 +145,4 @@ if [ "$1" == "compile" ]; then
     compile
     flashable
     upload
-fi
-
-if [ "$1" == "setup" ]; then
-    echo "Setting up workspace"
-    setup
-    githubconfig
-fi
-
-if [ "$1" == "githubset" ]; then
-    echo "Setting up github"
-    githubconfig
 fi
