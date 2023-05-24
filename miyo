@@ -11,7 +11,7 @@ ID=
 
 anykernel3(){
 rm -rf $WORK_DIR/Anykernel
-git clone --depth=1 https://github.com/Miiyo/AnyKernel3 $WORK_DIR/Anykernel
+git clone --depth=1 https://github.com/Miiyo/AnyKernel3 -b toku $WORK_DIR/Anykernel
 }
 
 Info(){
@@ -137,6 +137,7 @@ if [ "$1" == "compile" ]; then
     anykernel3
     cleanup
     cd ${KERNEL_DIR}
+    Info
     ksucheck
     checktype
     checkdevice
