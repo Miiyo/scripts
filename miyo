@@ -1,8 +1,7 @@
 #!/bin/bash
 
-KERNEL_DEFCONFIG=tama_akari_kddi_defconfig
 KERNEL_DIR=/workspace/android_kernel_sony_sdm845
-CLANG_DIR=/workspace/weeb
+CLANG_DIR=/workspace/zy
 WORK_DIR=/workspace
 export KBUILD_BUILD_USER=ekkusa
 export KBUILD_BUILD_HOST=miyo
@@ -11,7 +10,7 @@ ID=
 
 anykernel3(){
 rm -rf $WORK_DIR/Anykernel
-git clone --depth=1 https://github.com/Miiyo/AnyKernel3 -b toku $WORK_DIR/Anykernel
+git clone --depth=1 https://github.com/Miiyo/AnyKernel3- -b Toku $WORK_DIR/Anykernel
 }
 
 Info(){
@@ -46,14 +45,28 @@ checkdevice(){
     if [[ $KERNEL_DEFCONFIG = *"akari"* ]];
     then
     DEVICE="Sony Xperia XZ2 (akari)"
+    DeviceName1=akari
+    DeviceName2=akari_kddi
+    DeviceName3=H8296
     else
         if [[ $KERNEL_DEFCONFIG = *"akatsuki"* ]];
         then
         DEVICE="Sony Xperia XZ3 (akatsuki)"
+        DeviceName1=akatsuki
+        DeviceName2=H9436
         else
-            if [[ $KERNEL_DEFCONFIG = *"aurora"* ]];
+            if [[ $KERNEL_DEFCONFIG = *"apollo"* ]];
             then
-            DEVICE="Sony Xperia XZ2P (aurora)"
+            DEVICE="Sony Xperia XZ2C (apollo)"
+            DeviceName1=apollo
+            DeviceName2=H8324
+            else
+                if [[ $KERNEL_DEFCONFIG = *"aurora"* ]];
+                then
+                DEVICE="Sony Xperia XZ2P (aurora)"
+                DeviceName1=aurora
+                DeviceName2=H8166
+                fi
             fi
         fi
     fi
@@ -89,16 +102,14 @@ file() {
 }
 
 kernelbuild(){
-msg "-----[Miyo-Toku🐼]----- [$TAG]
-起きて～！Kernel Build has been triggered!
+msg "Toku - Kernel Build has been triggered.
 Date: $DATE
 Device: $DEVICE
 Type : $type
 KSU : $KSU
 Version: $VERSION
-Host: $KBUILD_BUILD_HOST
-Cores: $CORES
 Clang: $COMPILER
+[$TAG]
 "
 }
 
@@ -107,8 +118,14 @@ if [ -f out/arch/arm64/boot/Image.gz-dtb ]
 then
 cp out/arch/arm64/boot/Image.gz-dtb $WORK_DIR/Anykernel
 cd $WORK_DIR/Anykernel
-zip -r9 MiyoToku-$DATE.zip * -x .git README.md */placeholder
-cp $WORK_DIR/Anykernel/MiyoToku-$DATE.zip $WORK_DIR/
+sed -i "s/kernel\.for=placeholder/kernel.for=$type/" "anykernel.sh"
+sed -i "s/device\.name=placeholder/device.name=$DEVICE/" "anykernel.sh"
+sed -i "s/kernelsu\.version=placeholder/kernelsu.version=$KSU/" "anykernel.sh"
+sed -i "s/device\.name1=/device.name1=$DeviceName1/" "anykernel.sh"
+sed -i "s/device\.name2=/device.name2=$DeviceName2/" "anykernel.sh"
+sed -i "s/device\.name3=/device.name3=$DeviceName3/" "anykernel.sh"
+zip -r9 MiyoToku-$variant-$DATE.zip * -x .git README.md */placeholder
+cp $WORK_DIR/Anykernel/MiyoToku-$variant-$DATE.zip $WORK_DIR/
 BUILD_END=$(date +"%s")
 DIFF=$((BUILD_END - BUILD_START))
 else
@@ -117,7 +134,7 @@ fi
 }
 
 upload(){
-file "/workspace/MiyoToku-$DATE.zip" "起きろ！ Kernel Compiled! [$TAG]
+file "/workspace/MiyoToku-$variant-$DATE.zip" "Kernel Compiled. [$TAG]
 Build took : $((DIFF / 60)) minute(s) and $((DIFF % 60)) second(s)"
 }
 
@@ -134,9 +151,12 @@ if [ "$1" == "-file" ]; then
 fi
 
 if [ "$1" == "compile" ]; then
+    variant=$2
+    KERNEL_DEFCONFIG="tama_${variant}_defconfig"
     anykernel3
     cleanup
     cd ${KERNEL_DIR}
+    rm -rf out
     Info
     ksucheck
     checktype
